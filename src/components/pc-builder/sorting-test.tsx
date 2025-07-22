@@ -18,11 +18,11 @@ export function SortingTest({ connections }: { connections: Connection[] }) {
       return { correctCount: 0, totalCount: 0, isTestComplete: false };
     }
     const correctCount = Object.values(results).filter(r => r === 'correct').length;
-    const isTestComplete = Object.keys(results).length > 0 && correctCount === totalComponents;
+    const isTestComplete = correctCount === totalComponents;
     return { correctCount, totalCount: totalComponents, isTestComplete };
   }, [results, allComponents]);
 
-  const hasBeenTested = Object.keys(results).length > 0;
+  const hasBeenTested = Object.values(results).some(r => r !== null);
 
   return (
     <div className="p-4 space-y-4">
@@ -32,13 +32,15 @@ export function SortingTest({ connections }: { connections: Connection[] }) {
           Après avoir trié les composants dans l'onglet "Composants", cliquez sur "Vérifier" pour voir votre résultat.
         </p>
       </div>
-      <div className="flex gap-2">
+      <div className="flex items-center gap-4">
         <Button onClick={checkAnswers} size="sm" disabled={allComponents.length === 0}>Vérifier le tri</Button>
+        {hasBeenTested && (
+             <p className="font-semibold text-green-500">Note : {correctCount} / {totalCount}</p>
+        )}
       </div>
       
       {hasBeenTested && (
         <div className="pt-2">
-            <p className="font-semibold text-green-500">Note : {correctCount} / {totalCount}</p>
             <div className="mt-2">
             {isTestComplete ? (
               <Alert>

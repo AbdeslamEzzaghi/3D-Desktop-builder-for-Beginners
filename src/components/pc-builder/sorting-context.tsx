@@ -47,11 +47,9 @@ export const SortingProvider = ({ children }: { children: ReactNode }) => {
   const [results, setResults] = useState<Record<string, 'correct' | 'incorrect' | null>>({});
 
   useEffect(() => {
-    // Shuffle the components array on the client-side to avoid hydration errors
     const shuffled = [...ALL_COMPONENTS].sort(() => Math.random() - 0.5);
     setShuffledComponents(shuffled);
     
-    // Initialize placements and results based on the shuffled components
     const initialPlacements = shuffled.reduce((acc, curr) => ({ ...acc, [curr.id]: 'unsorted' }), {});
     setPlacements(initialPlacements);
     setResults({});
@@ -60,10 +58,10 @@ export const SortingProvider = ({ children }: { children: ReactNode }) => {
   const checkAnswers = () => {
     const newResults: Record<string, 'correct' | 'incorrect' | null> = {};
     ALL_COMPONENTS.forEach(component => {
-      if (placements[component.id] !== 'unsorted') {
+      if (placements[component.id] && placements[component.id] !== 'unsorted') {
         newResults[component.id] = placements[component.id] === component.category ? 'correct' : 'incorrect';
       } else {
-        newResults[component.id] = 'incorrect'; // Mark unsorted as incorrect
+        newResults[component.id] = null;
       }
     });
     setResults(newResults);
