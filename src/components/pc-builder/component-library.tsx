@@ -37,21 +37,25 @@ const DraggableComponent = ({ component, onDragStart, draggable: isDraggable, is
     setPlacements(prev => ({ ...prev, [component.id]: 'unsorted' }));
   }
 
+  const componentContent = (
+    <div
+      draggable={isDraggable}
+      onDragStart={(e) => onDragStart(e, component)}
+      className={cn(
+        "flex flex-col items-center justify-center p-4 border rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors h-full",
+        isDraggable ? "cursor-grab active:cursor-grabbing" : "cursor-not-allowed opacity-50",
+        result === 'correct' && 'border-green-500 bg-green-500/10',
+        result === 'incorrect' && 'border-red-500 bg-red-500/10'
+      )}
+    >
+      {component.icon}
+      <span className="mt-2 text-xs text-center">{component.name}</span>
+    </div>
+  );
+
   const componentDiv = (
     <div className="relative group">
-      <div
-        draggable={isDraggable}
-        onDragStart={(e) => onDragStart(e, component)}
-        className={cn(
-          "flex flex-col items-center justify-center p-4 border rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors h-full",
-          isDraggable ? "cursor-grab active:cursor-grabbing" : "cursor-not-allowed opacity-50",
-          result === 'correct' && 'border-green-500 bg-green-500/10',
-          result === 'incorrect' && 'border-red-500 bg-red-500/10'
-        )}
-      >
-        {component.icon}
-        <span className="mt-2 text-xs text-center">{component.name}</span>
-      </div>
+      {componentContent}
       {!isUnsorted && (
         <button
           onClick={handleRemove}
@@ -67,7 +71,7 @@ const DraggableComponent = ({ component, onDragStart, draggable: isDraggable, is
   if (isUnsorted) {
     return (
       <DropdownMenu>
-        <DropdownMenuTrigger asChild onContextMenu={(e) => { e.preventDefault(); if (!isDraggable) e.stopPropagation(); }}>
+        <DropdownMenuTrigger asChild>
           {componentDiv}
         </DropdownMenuTrigger>
         <DropdownMenuContent>
@@ -160,7 +164,7 @@ export function ComponentLibrary() {
                 key={c.id} 
                 component={c} 
                 onDragStart={(e) => handleComponentDragStart(e, c)} 
-                draggable={!isTestComplete} 
+                draggable={true} 
                 isUnsorted={true}
               />
             )}
