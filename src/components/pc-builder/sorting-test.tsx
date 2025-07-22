@@ -12,6 +12,9 @@ export function SortingTest() {
 
   const { correctCount, totalCount, isTestComplete } = useMemo(() => {
     const totalComponents = allComponents.length;
+    if (totalComponents === 0) {
+      return { correctCount: 0, totalCount: 0, isTestComplete: false };
+    }
     const correctCount = Object.values(results).filter(r => r === 'correct').length;
     const isTestComplete = Object.keys(results).length > 0 && correctCount === totalComponents;
     return { correctCount, totalCount: totalComponents, isTestComplete };
@@ -28,7 +31,7 @@ export function SortingTest() {
         </p>
       </div>
       <div className="flex gap-2">
-        <Button onClick={checkAnswers} size="sm">Vérifier</Button>
+        <Button onClick={checkAnswers} size="sm" disabled={allComponents.length === 0}>Vérifier</Button>
       </div>
       
       {hasBeenTested && (

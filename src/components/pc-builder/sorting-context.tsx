@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { createContext, useState, useContext, useMemo, ReactNode } from 'react';
+import React, { createContext, useState, useContext, useMemo, ReactNode, useEffect } from 'react';
 import { Monitor, Keyboard, Mouse, Printer, Zap, Headphones, Mic, Speaker, Camera, Scan, Cpu } from 'lucide-react';
 
 export type Component = {
@@ -16,11 +16,11 @@ export type Component = {
 export type Category = 'unsorted' | 'input' | 'output' | 'processing' | 'others';
 
 const ALL_COMPONENTS: Component[] = [
-  { id: 'keyboard', name: 'Clavier', type: 'keyboard', info: 'Périphérique d\'entrée : Clavier', category: 'input', icon: <Keyboard className="h-6 w-6" /> },
-  { id: 'mouse', name: 'Souris', type: 'mouse', info: 'Périphérique d\'entrée : Souris', category: 'input', icon: <Mouse className="h-6 w-6" /> },
-  { id: 'mic', name: 'Microphone', type: 'mic', info: 'Périphérique d\'entrée : Microphone', category: 'input', icon: <Mic className="h-6 w-6" /> },
-  { id: 'webcam', name: 'Webcam', type: 'webcam', info: 'Périphérique d\'entrée : Webcam', category: 'input', icon: <Camera className="h-6 w-6" /> },
-  { id: 'scanner', name: 'Scanner', type: 'scanner', info: 'Périphérique d\'entrée : Scanner', category: 'input', icon: <Scan className="h-6 w-6" /> },
+  { id: 'keyboard', name: 'Clavier', type: 'keyboard', info: 'Périphérique d\\\'entrée : Clavier', category: 'input', icon: <Keyboard className="h-6 w-6" /> },
+  { id: 'mouse', name: 'Souris', type: 'mouse', info: 'Périphérique d\\\'entrée : Souris', category: 'input', icon: <Mouse className="h-6 w-6" /> },
+  { id: 'mic', name: 'Microphone', type: 'mic', info: 'Périphérique d\\\'entrée : Microphone', category: 'input', icon: <Mic className="h-6 w-6" /> },
+  { id: 'webcam', name: 'Webcam', type: 'webcam', info: 'Périphérique d\\\'entrée : Webcam', category: 'input', icon: <Camera className="h-6 w-6" /> },
+  { id: 'scanner', name: 'Scanner', type: 'scanner', info: 'Périphérique d\\\'entrée : Scanner', category: 'input', icon: <Scan className="h-6 w-6" /> },
   { id: 'monitor', name: 'Moniteur', type: 'monitor', info: 'Périphérique de sortie : Moniteur', category: 'output', icon: <Monitor className="h-6 w-6" /> },
   { id: 'printer', name: 'Imprimante', type: 'printer', info: 'Périphérique de sortie : Imprimante', category: 'output', icon: <Printer className="h-6 w-6" /> },
   { id: 'headphones', name: 'Casque', type: 'headphones', info: 'Périphérique de sortie : Casque', category: 'output', icon: <Headphones className="h-6 w-6" /> },
@@ -42,14 +42,24 @@ type SortingContextType = {
 const SortingContext = createContext<SortingContextType | undefined>(undefined);
 
 export const SortingProvider = ({ children }: { children: ReactNode }) => {
-  const [placements, setPlacements] = useState<Record<string, Category>>(
-    ALL_COMPONENTS.reduce((acc, curr) => ({ ...acc, [curr.id]: 'unsorted' }), {})
-  );
+  const [shuffledComponents, setShuffledComponents] = useState<Component[]>([]);
+  const [placements, setPlacements] = useState<Record<string, Category>>({});
   const [results, setResults] = useState<Record<string, 'correct' | 'incorrect' | null>>({});
+
+  useEffect(() => {
+    // Shuffle the components array on the client-side to avoid hydration errors
+    const shuffled = [...ALL_COMPONENTS].sort(() => Math.random() - 0.5);
+    setShuffledComponents(shuffled);
+    
+    // Initialize placements and results based on the shuffled components
+    const initialPlacements = shuffled.reduce((acc, curr) => ({ ...acc, [curr.id]: 'unsorted' }), {});
+    setPlacements(initialPlacements);
+    setResults({});
+  }, []);
 
   const checkAnswers = () => {
     const newResults: Record<string, 'correct' | 'incorrect' | null> = {};
-    ALL_COMPONENTS.forEach(component => {
+    shuffledComponents.forEach(component => {
       if (placements[component.id] !== 'unsorted') {
         newResults[component.id] = placements[component.id] === component.category ? 'correct' : 'incorrect';
       } else {
@@ -60,19 +70,19 @@ export const SortingProvider = ({ children }: { children: ReactNode }) => {
   };
   
   const resetTest = () => {
-    setPlacements(ALL_COMPONENTS.reduce((acc, curr) => ({ ...acc, [curr.id]: 'unsorted' }), {}));
+    setPlacements(shuffledComponents.reduce((acc, curr) => ({ ...acc, [curr.id]: 'unsorted' }), {}));
     setResults({});
   };
 
   const value = useMemo(() => ({
-    allComponents: ALL_COMPONENTS,
+    allComponents: shuffledComponents,
     placements,
     setPlacements,
     results,
     setResults,
     checkAnswers,
     resetTest
-  }), [placements, results]);
+  }), [shuffledComponents, placements, results]);
 
   return (
     <SortingContext.Provider value={value}>
