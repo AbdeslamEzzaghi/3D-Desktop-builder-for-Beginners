@@ -3,7 +3,7 @@
 
 import React, { useMemo, useState } from 'react';
 import type { Connection } from './connection-context';
-import { CheckCircle2, XCircle } from 'lucide-react';
+import { CheckCircle2, XCircle, MinusCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
 import {
@@ -16,15 +16,17 @@ import {
 } from "@/components/ui/table"
 import { Badge } from '../ui/badge';
 
+type TestStatus = 'passed' | 'failed' | 'untested';
+
 type TestResult = {
   id: number;
   name: string;
-  passed: boolean;
+  status: TestStatus;
   points: number;
   conditions: string[];
 };
 
-const INITIAL_TESTS: Omit<TestResult, 'passed'>[] = [
+const INITIAL_TESTS: Omit<TestResult, 'status'>[] = [
     { id: 1, name: "L’unité centrale s’allume", points: 2, conditions: ["Connectée à la multiprise", "Multiprise connectée à la prise murale"] },
     { id: 2, name: "L’écran fonctionne", points: 2, conditions: ["Connecté à l’unité centrale (HDMI)", "Alimenté via multiprise"] },
     { id: 3, name: "Je peux écrire un texte", points: 1, conditions: ["Clavier connecté via USB à l’unité centrale"] },
@@ -36,7 +38,7 @@ const INITIAL_TESTS: Omit<TestResult, 'passed'>[] = [
 
 export function ConnectionTest({ connections }: { connections: Connection[] }) {
   const [testResults, setTestResults] = useState<TestResult[]>(
-    INITIAL_TESTS.map(t => ({...t, passed: false}))
+    INITIAL_TESTS.map(t => ({...t, status: 'untested'}))
   );
 
   const checkAllTests = () => {
@@ -73,13 +75,13 @@ export function ConnectionTest({ connections }: { connections: Connection[] }) {
           passed = speakersToTower || headphonesToTower;
           break;
       }
-      return { ...test, passed };
+      return { ...test, status: passed ? 'passed' : 'failed' } as TestResult;
     });
     setTestResults(newResults);
   };
 
   const totalPoints = useMemo(() => {
-    return testResults.reduce((acc, test) => acc + (test.passed ? test.points : 0), 0);
+    return testResults.reduce((acc, test) => acc + (test.status === 'passed' ? test.points : 0), 0);
   }, [testResults]);
 
   const maxPoints = useMemo(() => {
@@ -105,12 +107,14 @@ export function ConnectionTest({ connections }: { connections: Connection[] }) {
           </TableHeader>
           <TableBody>
             {testResults.map((test) => (
-              <TableRow key={test.id} className={cn(test.passed ? 'bg-green-500/10' : '')}>
+              <TableRow key={test.id} className={cn(test.status === 'passed' ? 'bg-green-500/10' : '')}>
                 <TableCell className="text-center">
-                  {test.passed ? (
+                  {test.status === 'passed' ? (
                     <CheckCircle2 className="h-5 w-5 text-green-500" />
-                  ) : (
+                  ) : test.status === 'failed' ? (
                     <XCircle className="h-5 w-5 text-red-500" />
+                  ) : (
+                    <MinusCircle className="h-5 w-5 text-muted-foreground" />
                   )}
                 </TableCell>
                 <TableCell className="font-medium">{test.name}</TableCell>
@@ -120,7 +124,7 @@ export function ConnectionTest({ connections }: { connections: Connection[] }) {
                     </ul>
                 </TableCell>
                 <TableCell className="text-right">
-                  <Badge variant={test.passed ? "default" : "secondary"} className={cn(test.passed && "bg-green-600")}>
+                  <Badge variant={test.status === 'passed' ? "default" : "secondary"} className={cn(test.status === 'passed' && "bg-green-600")}>
                     {test.points} pts
                   </Badge>
                 </TableCell>
