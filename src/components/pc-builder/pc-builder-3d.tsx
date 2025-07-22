@@ -9,7 +9,6 @@ import { ConnectionDialog } from './connection-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '../ui/alert-dialog';
 import { Trash2 } from 'lucide-react';
-import { useConnections } from './connection-context';
 import type { Connection } from './connection-context';
 
 export type DraggableObject = THREE.Group;
@@ -17,10 +16,13 @@ export type PortObject = THREE.Mesh;
 
 const DESK_LEVEL = 3.5;
 
-export function PCBuilder3D() {
+interface PCBuilder3DProps {
+  onConnectionsChange: (connections: Connection[]) => void;
+}
+
+export function PCBuilder3D({ onConnectionsChange }: PCBuilder3DProps) {
   const mountRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
-  const { setConnections } = useConnections();
   
   const [tooltip, setTooltip] = useState<{ content: string; x: number; y: number } | null>(null);
   const [selectedComponent, setSelectedComponent] = useState<DraggableObject | null>(null);
@@ -51,7 +53,7 @@ export function PCBuilder3D() {
     selectedComponentRef.current = selectedComponent;
   }, [selectedComponent]);
 
-  const updateConnectionContext = useCallback(() => {
+  const updateAndNotifyConnections = useCallback(() => {
     const allConnections: Connection[] = [];
     connectionsRef.current.forEach((conns, deviceId) => {
       conns.forEach(conn => {
@@ -73,8 +75,8 @@ export function PCBuilder3D() {
         });
       });
     });
-    setConnections(allConnections);
-  }, [setConnections]);
+    onConnectionsChange(allConnections);
+  }, [onConnectionsChange]);
 
   const applyOutline = (object: THREE.Object3D) => {
     object.traverse((child) => {
@@ -508,12 +510,12 @@ export function PCBuilder3D() {
             const connections = (connectionsRef.current.get(object.name) || []).filter(c => c.line !== line);
             connectionsRef.current.set(object.name, connections);
             port.userData.connectedTo = null;
-            updateConnectionContext();
+            updateAndNotifyConnections();
         }, 500);
     }
     setConnectionDialogOpen(false);
-    updateConnectionContext();
-  }, [toast, setWrongConnectionAlert, updateConnectionContext]);
+    updateAndNotifyConnections();
+  }, [toast, setWrongConnectionAlert, updateAndNotifyConnections]);
   
   // Drag and drop from sidebar
   const handleDrop = useCallback((e: DragEvent) => {
@@ -896,7 +898,7 @@ export function PCBuilder3D() {
         }
       }
     };
-  }, [createComponent, createPort, handleConnection, handleDrop, updateConnectionContext]);
+  }, [createComponent, createPort, handleConnection, handleDrop, updateAndNotifyConnections]);
 
   const onConnectClick = () => {
     if (selectedComponent) {
@@ -967,7 +969,7 @@ export function PCBuilder3D() {
       title: 'Composant supprimé',
       description: `Le composant ${selectedComponent.userData.info.split(': ')[1] || selectedComponent.userData.info} a été retiré.`,
     });
-    updateConnectionContext();
+    updateAndNotifyConnections();
   };
 
   return (

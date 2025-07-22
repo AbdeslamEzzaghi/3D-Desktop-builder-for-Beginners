@@ -7,8 +7,9 @@ import { useSorting } from './sorting-context';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { Terminal, TestTube2 } from 'lucide-react';
 import { ConnectionTest } from './connection-test';
+import type { Connection } from './connection-context';
 
-export function SortingTest() {
+export function SortingTest({ connections }: { connections: Connection[] }) {
   const { checkAnswers, results, allComponents } = useSorting();
 
   const { correctCount, totalCount, isTestComplete } = useMemo(() => {
@@ -65,7 +66,7 @@ export function SortingTest() {
         <p className="text-sm text-muted-foreground">
           Connectez les appareils sur la scène 3D. Ce test vérifie si les branchements sont corrects pour que l'ordinateur soit fonctionnel.
         </p>
-        <ConnectionTest />
+        <ConnectionTest connections={connections} />
       </div>
     </div>
   );

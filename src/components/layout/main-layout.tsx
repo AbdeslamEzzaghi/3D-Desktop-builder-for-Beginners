@@ -1,7 +1,7 @@
 
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Sidebar,
   SidebarContent,
@@ -17,9 +17,12 @@ import { ComponentLibrary } from '../pc-builder/component-library';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SortingTest } from '../pc-builder/sorting-test';
 import { SortingProvider } from '@/components/pc-builder/sorting-context';
+import type { Connection } from '../pc-builder/connection-context';
 import { ConnectionProvider } from '../pc-builder/connection-context';
 
 export function MainLayout() {
+  const [connections, setConnections] = useState<Connection[]>([]);
+
   return (
     <SortingProvider>
       <ConnectionProvider>
@@ -89,7 +92,7 @@ export function MainLayout() {
                   <ComponentLibrary />
                 </TabsContent>
                 <TabsContent value="tests" className="flex-1 overflow-auto">
-                  <SortingTest />
+                  <SortingTest connections={connections} />
                 </TabsContent>
               </Tabs>
             </SidebarContent>
@@ -103,7 +106,7 @@ export function MainLayout() {
               <h1 className="text-xl font-semibold">Simulateur de montage de PC 3D</h1>
             </header>
             <main className="flex-1 overflow-auto bg-background">
-              <PCBuilder3D />
+              <PCBuilder3D onConnectionsChange={setConnections} />
             </main>
           </SidebarInset>
         </SidebarProvider>
