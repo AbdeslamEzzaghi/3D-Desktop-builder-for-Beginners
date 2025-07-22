@@ -20,7 +20,7 @@ const DESK_LEVEL = 3.5;
 export function PCBuilder3D() {
   const mountRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
-  const { setConnections, checkAllTests } = useConnections();
+  const { setConnections } = useConnections();
   
   const [tooltip, setTooltip] = useState<{ content: string; x: number; y: number } | null>(null);
   const [selectedComponent, setSelectedComponent] = useState<DraggableObject | null>(null);
@@ -74,8 +74,7 @@ export function PCBuilder3D() {
       });
     });
     setConnections(allConnections);
-    checkAllTests();
-  }, [setConnections, checkAllTests]);
+  }, [setConnections]);
 
   const applyOutline = (object: THREE.Object3D) => {
     object.traverse((child) => {
@@ -581,7 +580,7 @@ export function PCBuilder3D() {
     if(newComponent) {
       draggableObjectsRef.current.push(newComponent);
     }
-  }, [createComponent, createPort, toast, handleConnection]);
+  }, [createComponent, createPort, toast]);
 
   useEffect(() => {
     const handleDragOver = (e: DragEvent) => e.preventDefault();
@@ -897,7 +896,7 @@ export function PCBuilder3D() {
         }
       }
     };
-  }, [createComponent, createPort, handleConnection, handleDrop]);
+  }, [createComponent, createPort, handleConnection, handleDrop, updateConnectionContext]);
 
   const onConnectClick = () => {
     if (selectedComponent) {
