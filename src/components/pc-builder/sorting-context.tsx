@@ -59,7 +59,7 @@ export const SortingProvider = ({ children }: { children: ReactNode }) => {
 
   const checkAnswers = () => {
     const newResults: Record<string, 'correct' | 'incorrect' | null> = {};
-    shuffledComponents.forEach(component => {
+    ALL_COMPONENTS.forEach(component => {
       if (placements[component.id] !== 'unsorted') {
         newResults[component.id] = placements[component.id] === component.category ? 'correct' : 'incorrect';
       } else {
