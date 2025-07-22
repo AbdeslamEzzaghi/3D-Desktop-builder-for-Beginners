@@ -46,7 +46,7 @@ export function ConnectionTest({ connections }: { connections: Connection[] }) {
       let passed = false;
       switch (test.id) {
         case 1:
-          const powerStripToWall = connections.some(c => c.from === 'power-strip' && c.to === 'wall' && c.type === 'power');
+          const powerStripToWall = connections.some(c => c.from === 'power-strip' && c.portType === 'wall-power' && c.type === 'power');
           const towerToStrip = connections.some(c => c.from === 'central-unit' && c.to === 'power-strip' && c.type === 'power');
           passed = powerStripToWall && towerToStrip;
           break;
