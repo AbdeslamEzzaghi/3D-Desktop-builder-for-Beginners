@@ -27,11 +27,11 @@ type TestResult = {
 };
 
 const INITIAL_TESTS: Omit<TestResult, 'status'>[] = [
-    { id: 1, name: "L’unité centrale s’allume", points: 2, conditions: ["Connectée à la multiprise", "Multiprise connectée à la prise murale"] },
-    { id: 2, name: "L’écran fonctionne", points: 2, conditions: ["Connecté à l’unité centrale (HDMI)", "Alimenté via multiprise"] },
+    { id: 1, name: "L’unité centrale s’allume", points: 2, conditions: ["Alimentée directement au mur", "OU alimentée via une multiprise, elle-même branchée au mur"] },
+    { id: 2, name: "L’écran fonctionne", points: 2, conditions: ["Connecté à l’unité centrale (HDMI)", "Alimenté (mur ou multiprise)"] },
     { id: 3, name: "Je peux écrire un texte", points: 1, conditions: ["Clavier connecté via USB à l’unité centrale"] },
     { id: 4, name: "Je peux cliquer et déplacer la souris", points: 1, conditions: ["Souris connectée via USB à l’unité centrale"] },
-    { id: 5, name: "Je peux imprimer un document", points: 2, conditions: ["Imprimante connectée en USB à l’unité centrale", "Alimentée via multiprise"] },
+    { id: 5, name: "Je peux imprimer un document", points: 2, conditions: ["Imprimante connectée en USB à l’unité centrale", "Alimentée (mur ou multiprise)"] },
     { id: 6, name: "Je peux enregistrer un son", points: 1, conditions: ["Micro connecté à la prise jack de l’unité centrale"] },
     { id: 7, name: "Je peux écouter de la musique", points: 2, conditions: ["Haut-parleur ou casque connecté à la prise jack"] },
 ];
@@ -44,16 +44,26 @@ export function ConnectionTest({ connections }: { connections: Connection[] }) {
   const checkAllTests = () => {
     const newResults = INITIAL_TESTS.map(test => {
       let passed = false;
+      
+      const isDevicePowered = (deviceId: string) => {
+        // Direct to wall
+        const isPoweredDirectly = connections.some(c => c.from === deviceId && c.portType === 'wall-power' && c.type === 'power');
+        if (isPoweredDirectly) return true;
+        
+        // Via power strip
+        const isStripPowered = connections.some(c => c.from === 'power-strip' && c.portType === 'wall-power' && c.type === 'power');
+        const isDeviceOnStrip = connections.some(c => c.from === deviceId && c.to === 'power-strip' && c.type === 'power');
+        return isStripPowered && isDeviceOnStrip;
+      };
+
       switch (test.id) {
         case 1:
-          const powerStripToWall = connections.some(c => c.from === 'power-strip' && c.portType === 'wall-power' && c.type === 'power');
-          const towerToStrip = connections.some(c => c.from === 'central-unit' && c.to === 'power-strip' && c.type === 'power');
-          passed = powerStripToWall && towerToStrip;
+          passed = isDevicePowered('central-unit');
           break;
         case 2:
           const monitorToTower = connections.some(c => c.from === 'monitor' && c.to === 'central-unit' && c.portType === 'hdmi');
-          const monitorToStrip = connections.some(c => c.from === 'monitor' && c.to === 'power-strip' && c.type === 'power');
-          passed = monitorToTower && monitorToStrip;
+          const monitorPowered = isDevicePowered('monitor');
+          passed = monitorToTower && monitorPowered;
           break;
         case 3:
           passed = connections.some(c => c.from === 'keyboard' && c.to === 'central-unit' && c.portType === 'usb');
@@ -63,8 +73,8 @@ export function ConnectionTest({ connections }: { connections: Connection[] }) {
           break;
         case 5:
           const printerToTower = connections.some(c => c.from === 'printer' && c.to === 'central-unit' && c.portType === 'usb');
-          const printerToStrip = connections.some(c => c.from === 'printer' && c.to === 'power-strip' && c.type === 'power');
-          passed = printerToTower && printerToStrip;
+          const printerPowered = isDevicePowered('printer');
+          passed = printerToTower && printerPowered;
           break;
         case 6:
           passed = connections.some(c => c.from === 'mic' && c.to === 'central-unit' && c.portType === 'mic-in');
@@ -119,7 +129,7 @@ export function ConnectionTest({ connections }: { connections: Connection[] }) {
                 </TableCell>
                 <TableCell className="font-medium">{test.name}</TableCell>
                 <TableCell className="text-sm text-muted-foreground">
-                    <ul className="list-disc pl-4">
+                    <ul className="list-disc pl-4 space-y-1">
                         {test.conditions.map((cond, i) => <li key={i}>{cond}</li>)}
                     </ul>
                 </TableCell>

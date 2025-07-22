@@ -644,9 +644,15 @@ export function PCBuilder3D({ onConnectionsChange }: PCBuilder3DProps) {
     const wallOutletGroup = new THREE.Group();
     wallOutletGroup.userData = { id: 'wall', info: 'Mur' };
     wallOutletGroup.position.set(5, 2, -19.7);
+    
+    const wallOutletGroup2 = wallOutletGroup.clone();
+    wallOutletGroup2.position.x = -5;
+    
+    scene.add(wallOutletGroup, wallOutletGroup2);
 
     const plate = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.8, 0.1), new THREE.MeshStandardMaterial({color: 0xffffff}));
     wallOutletGroup.add(plate);
+    wallOutletGroup2.add(plate.clone());
 
     const createOutlet = (yPos: number) => {
       const outlet = new THREE.Group();
@@ -672,11 +678,16 @@ export function PCBuilder3D({ onConnectionsChange }: PCBuilder3DProps) {
 
       return outlet;
     }
-    wallOutletGroup.add(createOutlet(0.15));
-    wallOutletGroup.add(createOutlet(-0.15));
+    const outlet1 = createOutlet(0.15);
+    const outlet2 = createOutlet(-0.15);
+    wallOutletGroup.add(outlet1, outlet2);
+    wallOutletGroup2.add(outlet1.clone(), outlet2.clone());
 
-    scene.add(wallOutletGroup);
-    createPort('wall-outlet', 'wall-power', 'power', ['power-strip'], wallOutletGroup, [0, 0, 0.1], 0x111111);
+    const wallPowerAccepts = ['power-strip', 'central-unit', 'monitor', 'printer', 'scanner'];
+    createPort('wall-outlet-1', 'wall-power', 'power', wallPowerAccepts, wallOutletGroup, [0, 0.15, 0.1], 0x111111);
+    createPort('wall-outlet-2', 'wall-power', 'power', wallPowerAccepts, wallOutletGroup, [0, -0.15, 0.1], 0x111111);
+    createPort('wall-outlet-3', 'wall-power', 'power', wallPowerAccepts, wallOutletGroup2, [0, 0.15, 0.1], 0x111111);
+    createPort('wall-outlet-4', 'wall-power', 'power', wallPowerAccepts, wallOutletGroup2, [0, -0.15, 0.1], 0x111111);
 
     const deskGroup = new THREE.Group();
     const tabletopMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513, roughness: 0.8 });
