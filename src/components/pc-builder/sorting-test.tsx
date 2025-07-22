@@ -5,7 +5,8 @@ import React, { useMemo } from 'react';
 import { Button } from '../ui/button';
 import { useSorting } from './sorting-context';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
-import { Terminal } from 'lucide-react';
+import { Terminal, TestTube2 } from 'lucide-react';
+import { ConnectionTest } from './connection-test';
 
 export function SortingTest() {
   const { checkAnswers, results, allComponents } = useSorting();
@@ -25,13 +26,13 @@ export function SortingTest() {
   return (
     <div className="p-4 space-y-4">
       <div>
-        <h3 className="text-md font-semibold mb-2">Test 1: Tri des périphériques</h3>
+        <h3 className="text-md font-semibold mb-2 flex items-center gap-2"><TestTube2 className="h-5 w-5" />Test 1: Tri des périphériques</h3>
         <p className="text-sm text-muted-foreground">
           Après avoir trié les composants dans l'onglet "Composants", cliquez sur "Vérifier" pour voir votre résultat.
         </p>
       </div>
       <div className="flex gap-2">
-        <Button onClick={checkAnswers} size="sm" disabled={allComponents.length === 0}>Vérifier</Button>
+        <Button onClick={checkAnswers} size="sm" disabled={allComponents.length === 0}>Vérifier le tri</Button>
       </div>
       
       {hasBeenTested && (
@@ -59,11 +60,12 @@ export function SortingTest() {
         </div>
       )}
 
-      <div className="pt-8">
-        <h3 className="text-md font-semibold mb-2 text-muted-foreground/50">Autres tests</h3>
-        <p className="text-sm text-muted-foreground/50">
-          D'autres tests seront bientôt disponibles...
+      <div className="pt-8 space-y-4">
+        <h3 className="text-md font-semibold mb-2 flex items-center gap-2"><TestTube2 className="h-5 w-5" />Test 2: Connexions des appareils</h3>
+        <p className="text-sm text-muted-foreground">
+          Connectez les appareils sur la scène 3D. Ce test vérifie si les branchements sont corrects pour que l'ordinateur soit fonctionnel.
         </p>
+        <ConnectionTest />
       </div>
     </div>
   );

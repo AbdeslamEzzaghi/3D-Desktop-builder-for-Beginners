@@ -9,6 +9,8 @@ import { ConnectionDialog } from './connection-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '../ui/alert-dialog';
 import { Trash2 } from 'lucide-react';
+import { useConnections } from './connection-context';
+import type { Connection } from './connection-context';
 
 export type DraggableObject = THREE.Group;
 export type PortObject = THREE.Mesh;
@@ -18,6 +20,7 @@ const DESK_LEVEL = 3.5;
 export function PCBuilder3D() {
   const mountRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const { setConnections, checkAllTests } = useConnections();
   
   const [tooltip, setTooltip] = useState<{ content: string; x: number; y: number } | null>(null);
   const [selectedComponent, setSelectedComponent] = useState<DraggableObject | null>(null);
@@ -36,7 +39,7 @@ export function PCBuilder3D() {
   
   const draggableObjectsRef = useRef<DraggableObject[]>([]);
   const portsRef = useRef<PortObject[]>([]);
-  const connectionsRef = useRef<Map<string, { line: THREE.Line, toPortId: string, connectionType: string }[]>>(new Map());
+  const connectionsRef = useRef<Map<string, { line: THREE.Line, toPortId: string, connectionType: string, toPortType: string }[]>>(new Map());
   
   const selectedObjectForDragRef = useRef<DraggableObject | null>(null);
   const planeRef = useRef(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0));
@@ -47,6 +50,32 @@ export function PCBuilder3D() {
   useEffect(() => {
     selectedComponentRef.current = selectedComponent;
   }, [selectedComponent]);
+
+  const updateConnectionContext = useCallback(() => {
+    const allConnections: Connection[] = [];
+    connectionsRef.current.forEach((conns, deviceId) => {
+      conns.forEach(conn => {
+        const port = portsRef.current.find(p => p.name === conn.toPortId);
+        let portParentName = 'unknown';
+        if (port) {
+            let parent = port.parent;
+            while(parent && !parent.userData.id) {
+                parent = parent.parent;
+            }
+            if (parent) portParentName = parent.userData.id;
+        }
+
+        allConnections.push({
+          from: deviceId,
+          to: portParentName,
+          type: conn.connectionType,
+          portType: conn.toPortType,
+        });
+      });
+    });
+    setConnections(allConnections);
+    checkAllTests();
+  }, [setConnections, checkAllTests]);
 
   const applyOutline = (object: THREE.Object3D) => {
     object.traverse((child) => {
@@ -463,7 +492,7 @@ export function PCBuilder3D() {
     line.name = `line_${object.name}_to_${port.name}`;
     sceneRef.current.add(line);
     
-    const newConnection = { line, toPortId: port.name, connectionType };
+    const newConnection = { line, toPortId: port.name, connectionType, toPortType: port.userData.type };
     connectionsRef.current.set(object.name, [...existingConnections, newConnection]);
     port.userData.connectedTo = object.name;
     
@@ -480,10 +509,12 @@ export function PCBuilder3D() {
             const connections = (connectionsRef.current.get(object.name) || []).filter(c => c.line !== line);
             connectionsRef.current.set(object.name, connections);
             port.userData.connectedTo = null;
+            updateConnectionContext();
         }, 500);
     }
     setConnectionDialogOpen(false);
-  }, [toast, setWrongConnectionAlert]);
+    updateConnectionContext();
+  }, [toast, setWrongConnectionAlert, updateConnectionContext]);
   
   // Drag and drop from sidebar
   const handleDrop = useCallback((e: DragEvent) => {
@@ -937,6 +968,7 @@ export function PCBuilder3D() {
       title: 'Composant supprimé',
       description: `Le composant ${selectedComponent.userData.info.split(': ')[1] || selectedComponent.userData.info} a été retiré.`,
     });
+    updateConnectionContext();
   };
 
   return (
