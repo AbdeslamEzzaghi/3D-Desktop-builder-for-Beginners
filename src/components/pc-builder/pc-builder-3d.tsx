@@ -15,6 +15,8 @@ export type DraggableObject = THREE.Group;
 export type PortObject = THREE.Mesh;
 
 const DESK_LEVEL = 3.5;
+const POWER_CONNECTABLE_DEVICES = ['central-unit', 'monitor', 'printer', 'scanner', 'power-strip'];
+
 
 interface PCBuilder3DProps {
   onConnectionsChange: (connections: Connection[]) => void;
@@ -565,7 +567,7 @@ export function PCBuilder3D({ onConnectionsChange }: PCBuilder3DProps) {
       case 'printer': newComponent = createComponent(name, type, 'Périphérique de sortie : Imprimante', [dropPoint.x, DESK_LEVEL + 0.45, dropPoint.z], createPrinter, {power: true, data: true, dataType: 'usb'}); break;
       case 'power-strip':
         const powerStrip = createComponent(name, type, 'Multiprise', [dropPoint.x, 0.2, dropPoint.z], createPowerStrip, {power: true});
-        const powerStripAccepts = ['central-unit', 'monitor', 'printer', 'scanner'];
+        const powerStripAccepts = POWER_CONNECTABLE_DEVICES.filter(d => d !== 'power-strip');
         createPort('power-strip-1', 'power-strip-outlet', 'power', powerStripAccepts, powerStrip, [-0.9, 0.21, 0.05], 0x111111);
         createPort('power-strip-2', 'power-strip-outlet', 'power', powerStripAccepts, powerStrip, [-0.3, 0.21, 0.05], 0x111111);
         createPort('power-strip-3', 'power-strip-outlet', 'power', powerStripAccepts, powerStrip, [0.3, 0.21, 0.05], 0x111111);
@@ -683,11 +685,10 @@ export function PCBuilder3D({ onConnectionsChange }: PCBuilder3DProps) {
     wallOutletGroup.add(outlet1, outlet2);
     wallOutletGroup2.add(outlet1.clone(), outlet2.clone());
 
-    const wallPowerAccepts = ['power-strip', 'central-unit', 'monitor', 'printer', 'scanner'];
-    createPort('wall-outlet-1', 'wall-power', 'power', wallPowerAccepts, wallOutletGroup, [0, 0.15, 0.1], 0x111111);
-    createPort('wall-outlet-2', 'wall-power', 'power', wallPowerAccepts, wallOutletGroup, [0, -0.15, 0.1], 0x111111);
-    createPort('wall-outlet-3', 'wall-power', 'power', wallPowerAccepts, wallOutletGroup2, [0, 0.15, 0.1], 0x111111);
-    createPort('wall-outlet-4', 'wall-power', 'power', wallPowerAccepts, wallOutletGroup2, [0, -0.15, 0.1], 0x111111);
+    createPort('wall-outlet-1', 'wall-power', 'power', POWER_CONNECTABLE_DEVICES, wallOutletGroup, [0, 0.15, 0.1], 0x111111);
+    createPort('wall-outlet-2', 'wall-power', 'power', POWER_CONNECTABLE_DEVICES, wallOutletGroup, [0, -0.15, 0.1], 0x111111);
+    createPort('wall-outlet-3', 'wall-power', 'power', POWER_CONNECTABLE_DEVICES, wallOutletGroup2, [0, 0.15, 0.1], 0x111111);
+    createPort('wall-outlet-4', 'wall-power', 'power', POWER_CONNECTABLE_DEVICES, wallOutletGroup2, [0, -0.15, 0.1], 0x111111);
 
     const deskGroup = new THREE.Group();
     const tabletopMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513, roughness: 0.8 });
