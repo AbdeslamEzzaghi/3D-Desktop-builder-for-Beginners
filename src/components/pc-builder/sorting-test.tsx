@@ -10,10 +10,11 @@ import { Terminal } from 'lucide-react';
 export function SortingTest() {
   const { checkAnswers, results, allComponents } = useSorting();
 
-  const isTestComplete = useMemo(() => {
+  const { correctCount, totalCount, isTestComplete } = useMemo(() => {
     const totalComponents = allComponents.length;
     const correctCount = Object.values(results).filter(r => r === 'correct').length;
-    return Object.keys(results).length > 0 && correctCount === totalComponents;
+    const isTestComplete = Object.keys(results).length > 0 && correctCount === totalComponents;
+    return { correctCount, totalCount: totalComponents, isTestComplete };
   }, [results, allComponents]);
 
   const hasBeenTested = Object.keys(results).length > 0;
@@ -31,23 +32,28 @@ export function SortingTest() {
       </div>
       
       {hasBeenTested && (
-        isTestComplete ? (
-          <Alert>
-            <Terminal className="h-4 w-4" />
-            <AlertTitle>Félicitations !</AlertTitle>
-            <AlertDescription>
-              Vous avez correctement trié tous les composants. Vous pouvez maintenant les glisser sur la scène 3D depuis l'onglet "Composants".
-            </AlertDescription>
-          </Alert>
-        ) : (
-          <Alert variant="destructive">
-            <Terminal className="h-4 w-4" />
-            <AlertTitle>Résultat du test</AlertTitle>
-            <AlertDescription>
-              Certains composants ne sont pas dans la bonne catégorie. Retournez à l'onglet "Composants" pour corriger vos erreurs (en rouge).
-            </AlertDescription>
-          </Alert>
-        )
+        <div className="pt-2">
+            <p className="font-semibold text-green-500">Note : {correctCount} / {totalCount}</p>
+            <div className="mt-2">
+            {isTestComplete ? (
+              <Alert>
+                <Terminal className="h-4 w-4" />
+                <AlertTitle>Félicitations !</AlertTitle>
+                <AlertDescription>
+                  Vous avez correctement trié tous les composants. Vous pouvez maintenant les glisser sur la scène 3D depuis l'onglet "Composants".
+                </AlertDescription>
+              </Alert>
+            ) : (
+              <Alert variant="destructive">
+                <Terminal className="h-4 w-4" />
+                <AlertTitle>Résultat du test</AlertTitle>
+                <AlertDescription>
+                  Certains composants ne sont pas dans la bonne catégorie. Retournez à l'onglet "Composants" pour corriger vos erreurs (en rouge).
+                </AlertDescription>
+              </Alert>
+            )}
+            </div>
+        </div>
       )}
 
       <div className="pt-8">
