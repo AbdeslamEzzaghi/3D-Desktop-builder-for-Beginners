@@ -1,34 +1,26 @@
-# 💻 Simulateur 3D : Composer une Unité Centrale Interactivement
+# 💻 Simulateur 3D : Montage et Connectique PC
 
-Un projet éducatif interactif pour aider les élèves à comprendre les composants d’un système informatique (entrée, sortie, traitement) et à les connecter correctement à une unité centrale.
+Un projet éducatif interactif conçu pour aider les élèves à comprendre l'architecture d'un système informatique et la logique des branchements (Entrée, Sortie, Traitement, Énergie).
 
-## 🎯 Objectifs pédagogiques
+## 🖥️ Fonctionnalités Actuelles
 
-- Identifier les périphériques d’entrée, de sortie et les éléments de traitement.
-- Comprendre le rôle de chaque appareil dans un système informatique.
-- Apprendre à connecter les périphériques à l’unité centrale.
-- Visualiser les ports (USB, HDMI, Jack, etc.) et les connexions d’alimentation.
+- **🎮 Scène 3D Interactive** : Environnement complet avec bureau, murs et prises murales simulés via Three.js.
+- **📦 Bibliothèque de Composants** : Unité centrale, Moniteur, Clavier, Souris, Imprimante, Multiprise, Casque, Microphone, Haut-parleurs, Webcam et Scanner.
+- **🧠 Atelier de Tri** : Système de classification par catégories (Entrée, Sortie, Traitement, Autres) avec retour visuel immédiat.
+- **🔌 Câblage Logique** : Gestion des types de ports (HDMI, USB, Jack Audio, Prises de courant). Les câbles sont tracés dynamiquement en 3D.
+- **⚡ Simulation Électrique** : Gestion des dépendances (un appareil sur multiprise ne fonctionne que si la multiprise est reliée au secteur).
+- **🧪 Banc de Test** : Vérification automatisée de 7 scénarios d'usage (allumage, écriture, impression, audio) avec système de scoring.
 
----
+## 🛠️ Stack Technique
 
-## 🖥️ Fonctionnalités
+- **Framework** : Next.js 15 (App Router)
+- **3D** : Three.js (Vanilla integration)
+- **UI** : Tailwind CSS, Shadcn/UI, Lucide Icons
+- **Langage** : TypeScript
 
-- 🎮 Interface 3D interactive (Three.js)
-- 🖱️ Drag-and-drop des périphériques autour de l’unité centrale
-- 🔌 Connexions avec retour visuel (vert : correct, rouge : incorrect)
-- 🧠 Info-bulles éducatives pour chaque composant
-- ⚡ Connexion à la prise d’alimentation simulée
+## 🎯 Objectifs Pédagogiques
 
----
-
-## 🧩 Périphériques simulés
-
-- **Clavier** (USB)  
-- **Souris** (USB)  
-- **Webcam** (USB)  
-- **Scanner** (USB)  
-- **Imprimante** (USB et power cord)  
-- **Microphone** (Jack audio ou USB)  
-- **Casque / Haut-parleurs** (Jack audio)  
-- **Moniteur** (HDMI/VGA/DisplayPort et power cord)  
-- **Unité centrale** (Power cord)
+1. **Identifier** les composants internes et externes d'un PC.
+2. **Classifier** les périphériques selon leur rôle (E/S).
+3. **Maîtriser** la connectique physique (associer le bon câble au bon port).
+4. **Comprendre** la distribution de l'énergie dans un poste de travail.
